@@ -1,0 +1,6 @@
+pandas>=2.0
+numpy>=1.26
+faker>=24.0
+python-dotenv>=1.0
+SQLAlchemy>=2.0
+psycopg[binary]>=3.1
