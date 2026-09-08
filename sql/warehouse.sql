@@ -32,6 +32,9 @@ CREATE TABLE IF NOT EXISTS warehouse.dim_date (
 COMMENT ON TABLE warehouse.dim_date IS
     'Date dimension. date_key is YYYYMMDD (for example 20250131).';
 
+CREATE INDEX IF NOT EXISTS idx_dim_date_year_month
+    ON warehouse.dim_date (year, month_number);
+
 CREATE TABLE IF NOT EXISTS warehouse.dim_customer (
     customer_key       BIGSERIAL PRIMARY KEY,
     customer_id        VARCHAR(64) NOT NULL UNIQUE,
@@ -74,6 +77,9 @@ COMMENT ON COLUMN warehouse.dim_product.product_key IS
 COMMENT ON COLUMN warehouse.dim_product.product_id IS
     'Source-system business key (for example PRD-00001).';
 
+CREATE INDEX IF NOT EXISTS idx_dim_product_category
+    ON warehouse.dim_product (category);
+
 CREATE TABLE IF NOT EXISTS warehouse.dim_store (
     store_key          BIGSERIAL PRIMARY KEY,
     store_id           VARCHAR(64) NOT NULL UNIQUE,
@@ -95,6 +101,11 @@ COMMENT ON COLUMN warehouse.dim_store.store_key IS
     'Warehouse surrogate key.';
 COMMENT ON COLUMN warehouse.dim_store.store_id IS
     'Source-system business key (for example STR-0001).';
+
+CREATE INDEX IF NOT EXISTS idx_dim_store_country
+    ON warehouse.dim_store (country);
+CREATE INDEX IF NOT EXISTS idx_dim_store_type
+    ON warehouse.dim_store (store_type);
 
 CREATE TABLE IF NOT EXISTS warehouse.dim_channel (
     channel_key        INTEGER PRIMARY KEY,
@@ -137,6 +148,7 @@ CREATE TABLE IF NOT EXISTS warehouse.fact_sales (
     store_key              BIGINT NOT NULL,
     channel_key            INTEGER NOT NULL,
     currency_key           INTEGER NOT NULL,
+    -- Optional: payments are order-level; nullable when payment is unknown or multi-attempt.
     payment_method_key     INTEGER,
     source_order_id        VARCHAR(64) NOT NULL,
     source_order_item_id   VARCHAR(64) NOT NULL,

@@ -323,6 +323,7 @@ CREATE TABLE IF NOT EXISTS monitoring.pipeline_runs (
     records_validated    INTEGER,
     records_rejected     INTEGER,
     records_loaded       INTEGER,
+    quality_score        NUMERIC(5, 2),
     error_message        TEXT,
     CONSTRAINT chk_pipeline_runs_status
         CHECK (status IN ('RUNNING', 'SUCCESS', 'FAILED', 'PARTIAL')),
@@ -332,8 +333,14 @@ CREATE TABLE IF NOT EXISTS monitoring.pipeline_runs (
             AND COALESCE(records_validated, 0) >= 0
             AND COALESCE(records_rejected, 0) >= 0
             AND COALESCE(records_loaded, 0) >= 0
-        )
+        ),
+    CONSTRAINT chk_pipeline_runs_quality_score
+        CHECK (quality_score IS NULL OR (quality_score >= 0 AND quality_score <= 100))
 );
+
+-- Safe for databases created before quality_score existed.
+ALTER TABLE monitoring.pipeline_runs
+    ADD COLUMN IF NOT EXISTS quality_score NUMERIC(5, 2);
 
 CREATE TABLE IF NOT EXISTS monitoring.data_quality_results (
     quality_result_id    BIGSERIAL PRIMARY KEY,

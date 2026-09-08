@@ -88,7 +88,15 @@ LOG_DIR = _env_path("LOG_DIR", PROJECT_ROOT / "logs")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 
 # ---------------------------------------------------------------------------
-# PostgreSQL (used by src/database.py; ETL will use the same settings later)
+# ETL / data-quality settings
+# ---------------------------------------------------------------------------
+# Minimum valid_records / total_records * 100 required per source table.
+# Below this threshold the run fails and warehouse loading is skipped.
+QUALITY_THRESHOLD = _env_float("QUALITY_THRESHOLD", 95.0)
+PIPELINE_NAME = os.getenv("PIPELINE_NAME", "shopsphere_batch_etl")
+
+# ---------------------------------------------------------------------------
+# PostgreSQL (used by src/database.py and the ETL pipeline)
 # Do not put real passwords in this file. Set them in a local .env instead.
 # ---------------------------------------------------------------------------
 POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
