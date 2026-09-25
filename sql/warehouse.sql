@@ -159,6 +159,13 @@ CREATE TABLE IF NOT EXISTS warehouse.fact_sales (
     net_amount             NUMERIC(14, 2) NOT NULL,
     cost_amount            NUMERIC(14, 2) NOT NULL,
     profit_amount          NUMERIC(14, 2) NOT NULL,
+    -- Historical FX reporting measures (from exchange_rates on the order date).
+    -- Nullable so existing databases can be migrated with ADD COLUMN IF NOT EXISTS.
+    gross_amount_inr       NUMERIC(14, 2),
+    discount_amount_inr    NUMERIC(14, 2),
+    net_amount_inr         NUMERIC(14, 2),
+    cost_amount_inr        NUMERIC(14, 2),
+    profit_amount_inr      NUMERIC(14, 2),
     order_status           VARCHAR(50),
     CONSTRAINT uq_fact_sales_order_item UNIQUE (source_order_item_id),
     CONSTRAINT fk_fact_sales_date
@@ -180,11 +187,15 @@ CREATE TABLE IF NOT EXISTS warehouse.fact_sales (
     CONSTRAINT chk_fact_sales_gross CHECK (gross_amount >= 0),
     CONSTRAINT chk_fact_sales_discount CHECK (discount_amount >= 0),
     CONSTRAINT chk_fact_sales_net CHECK (net_amount >= 0),
-    CONSTRAINT chk_fact_sales_cost CHECK (cost_amount >= 0)
+    CONSTRAINT chk_fact_sales_cost CHECK (cost_amount >= 0),
+    CONSTRAINT chk_fact_sales_gross_inr CHECK (gross_amount_inr IS NULL OR gross_amount_inr >= 0),
+    CONSTRAINT chk_fact_sales_discount_inr CHECK (discount_amount_inr IS NULL OR discount_amount_inr >= 0),
+    CONSTRAINT chk_fact_sales_net_inr CHECK (net_amount_inr IS NULL OR net_amount_inr >= 0),
+    CONSTRAINT chk_fact_sales_cost_inr CHECK (cost_amount_inr IS NULL OR cost_amount_inr >= 0)
 );
 
 COMMENT ON TABLE warehouse.fact_sales IS
-    'Sales fact at order-line grain. ONE ROW = ONE PRODUCT LINE WITHIN ONE CUSTOMER ORDER. Amounts are in the transaction currency (see currency_key). Expected measures: gross_amount = quantity * unit_price; discount_amount = gross_amount * discount_percent / 100; net_amount = gross_amount - discount_amount; cost_amount = quantity * product unit_cost; profit_amount = net_amount - cost_amount.';
+    'Sales fact at order-line grain. ONE ROW = ONE PRODUCT LINE WITHIN ONE CUSTOMER ORDER. unit_price and *_amount are in the transaction currency (currency_key). *_amount_inr are historical FX reporting measures from exchange_rates on the order date — not dim_currency.rate_to_inr.';
 
 CREATE TABLE IF NOT EXISTS warehouse.fact_delivery (
     delivery_key               BIGSERIAL PRIMARY KEY,
