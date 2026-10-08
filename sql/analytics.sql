@@ -2,23 +2,22 @@
 -- Requires sql/warehouse.sql to have been applied first.
 -- Views return no rows until ETL loads the warehouse; they do not hard-code figures.
 --
--- Monetary measures are converted to INR using warehouse.dim_currency.rate_to_inr
--- (a reference rate). Dated historical FX conversion is a later ETL improvement.
+-- Monetary measures use historical FX-derived INR columns on warehouse.fact_sales
+-- (net_amount_inr, profit_amount_inr), persisted by ETL from exchange_rates on the
+-- order date — not dim_currency.rate_to_inr.
 
 CREATE OR REPLACE VIEW analytics.monthly_sales AS
 SELECT
     d.year,
     d.month_number AS month,
     d.month_name,
-    ROUND(SUM(f.net_amount * ccy.rate_to_inr), 2) AS sales,
+    ROUND(SUM(f.net_amount_inr), 2) AS sales,
     COUNT(DISTINCT f.source_order_id) AS orders,
     SUM(f.quantity) AS units,
-    ROUND(SUM(f.profit_amount * ccy.rate_to_inr), 2) AS profit
+    ROUND(SUM(f.profit_amount_inr), 2) AS profit
 FROM warehouse.fact_sales AS f
 INNER JOIN warehouse.dim_date AS d
     ON d.date_key = f.date_key
-INNER JOIN warehouse.dim_currency AS ccy
-    ON ccy.currency_key = f.currency_key
 GROUP BY
     d.year,
     d.month_number,
@@ -30,15 +29,13 @@ COMMENT ON VIEW analytics.monthly_sales IS
 CREATE OR REPLACE VIEW analytics.category_performance AS
 SELECT
     p.category,
-    ROUND(SUM(f.net_amount * ccy.rate_to_inr), 2) AS sales,
+    ROUND(SUM(f.net_amount_inr), 2) AS sales,
     SUM(f.quantity) AS units,
     COUNT(DISTINCT f.source_order_id) AS orders,
-    ROUND(SUM(f.profit_amount * ccy.rate_to_inr), 2) AS profit
+    ROUND(SUM(f.profit_amount_inr), 2) AS profit
 FROM warehouse.fact_sales AS f
 INNER JOIN warehouse.dim_product AS p
     ON p.product_key = f.product_key
-INNER JOIN warehouse.dim_currency AS ccy
-    ON ccy.currency_key = f.currency_key
 GROUP BY
     p.category;
 
@@ -51,15 +48,13 @@ SELECT
     p.product_name,
     p.category,
     p.brand,
-    ROUND(SUM(f.net_amount * ccy.rate_to_inr), 2) AS sales,
+    ROUND(SUM(f.net_amount_inr), 2) AS sales,
     SUM(f.quantity) AS units,
     COUNT(DISTINCT f.source_order_id) AS orders,
-    ROUND(SUM(f.profit_amount * ccy.rate_to_inr), 2) AS profit
+    ROUND(SUM(f.profit_amount_inr), 2) AS profit
 FROM warehouse.fact_sales AS f
 INNER JOIN warehouse.dim_product AS p
     ON p.product_key = f.product_key
-INNER JOIN warehouse.dim_currency AS ccy
-    ON ccy.currency_key = f.currency_key
 GROUP BY
     p.product_id,
     p.product_name,
@@ -76,15 +71,13 @@ SELECT
     s.store_type,
     s.country,
     s.city,
-    ROUND(SUM(f.net_amount * ccy.rate_to_inr), 2) AS sales,
+    ROUND(SUM(f.net_amount_inr), 2) AS sales,
     COUNT(DISTINCT f.source_order_id) AS orders,
     SUM(f.quantity) AS units,
-    ROUND(SUM(f.profit_amount * ccy.rate_to_inr), 2) AS profit
+    ROUND(SUM(f.profit_amount_inr), 2) AS profit
 FROM warehouse.fact_sales AS f
 INNER JOIN warehouse.dim_store AS s
     ON s.store_key = f.store_key
-INNER JOIN warehouse.dim_currency AS ccy
-    ON ccy.currency_key = f.currency_key
 GROUP BY
     s.store_id,
     s.store_name,
@@ -100,15 +93,13 @@ SELECT
     ch.channel_code,
     ch.channel_name,
     ch.channel_group,
-    ROUND(SUM(f.net_amount * ccy.rate_to_inr), 2) AS sales,
+    ROUND(SUM(f.net_amount_inr), 2) AS sales,
     COUNT(DISTINCT f.source_order_id) AS orders,
     SUM(f.quantity) AS units,
-    ROUND(SUM(f.profit_amount * ccy.rate_to_inr), 2) AS profit
+    ROUND(SUM(f.profit_amount_inr), 2) AS profit
 FROM warehouse.fact_sales AS f
 INNER JOIN warehouse.dim_channel AS ch
     ON ch.channel_key = f.channel_key
-INNER JOIN warehouse.dim_currency AS ccy
-    ON ccy.currency_key = f.currency_key
 GROUP BY
     ch.channel_code,
     ch.channel_name,
@@ -124,15 +115,13 @@ SELECT
     c.last_name,
     c.country,
     c.customer_segment,
-    ROUND(SUM(f.net_amount * ccy.rate_to_inr), 2) AS sales,
+    ROUND(SUM(f.net_amount_inr), 2) AS sales,
     COUNT(DISTINCT f.source_order_id) AS orders,
     SUM(f.quantity) AS units,
-    ROUND(SUM(f.profit_amount * ccy.rate_to_inr), 2) AS profit
+    ROUND(SUM(f.profit_amount_inr), 2) AS profit
 FROM warehouse.fact_sales AS f
 INNER JOIN warehouse.dim_customer AS c
     ON c.customer_key = f.customer_key
-INNER JOIN warehouse.dim_currency AS ccy
-    ON ccy.currency_key = f.currency_key
 GROUP BY
     c.customer_id,
     c.first_name,

@@ -200,7 +200,11 @@ def test_transform_output_preserves_original_currency_and_builds_inr() -> None:
     assert "order_total" not in sales.columns
 
     loadable = fact_sales_for_load(sales)
-    assert "net_amount_inr" not in loadable.columns
+    assert "gross_amount_inr" in loadable.columns
+    assert "discount_amount_inr" in loadable.columns
+    assert "net_amount_inr" in loadable.columns
+    assert "cost_amount_inr" in loadable.columns
+    assert "profit_amount_inr" in loadable.columns
     assert "fx_rate_to_inr" not in loadable.columns
     assert loadable.iloc[0]["net_amount"] == 180.0
 
@@ -237,6 +241,11 @@ def test_fact_sales_load_shape_is_idempotent_safe() -> None:
         "net_amount",
         "cost_amount",
         "profit_amount",
+        "gross_amount_inr",
+        "discount_amount_inr",
+        "net_amount_inr",
+        "cost_amount_inr",
+        "profit_amount_inr",
         "order_status",
     }
     # Documented upsert targets remain the load helpers used by the pipeline.

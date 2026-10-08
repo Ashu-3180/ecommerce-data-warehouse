@@ -57,6 +57,11 @@ FACT_SALES_LOAD_COLUMNS: tuple[str, ...] = (
     "net_amount",
     "cost_amount",
     "profit_amount",
+    "gross_amount_inr",
+    "discount_amount_inr",
+    "net_amount_inr",
+    "cost_amount_inr",
+    "profit_amount_inr",
     "order_status",
 )
 
