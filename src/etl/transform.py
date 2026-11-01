@@ -639,7 +639,7 @@ def load_dimensions(engine: Engine, valid: dict[str, pd.DataFrame]) -> dict[str,
 
 
 def fact_sales_for_load(fact_sales: pd.DataFrame) -> pd.DataFrame:
-    """Strip INR helper columns before inserting into warehouse.fact_sales."""
+    """Select warehouse fact_sales columns, including persisted INR amounts."""
     cols = [c for c in FACT_SALES_LOAD_COLUMNS if c in fact_sales.columns]
     return fact_sales.loc[:, cols].copy()
 
