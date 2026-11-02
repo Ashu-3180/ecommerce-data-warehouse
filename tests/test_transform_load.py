@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 from datetime import date
+from unittest.mock import MagicMock, patch
 
 import pandas as pd
 
+from src.config import QUALITY_THRESHOLD
+from src.etl.constants import REQUIRED_QUALITY_TABLES
 from src.etl.load import replace_fact_delivery, replace_fact_sales
+from src.etl.pipeline import run_etl
 from src.etl.transform import (
     attach_exchange_rates,
     calculate_line_amounts,
@@ -14,6 +18,7 @@ from src.etl.transform import (
     fact_sales_for_load,
     transform_all,
 )
+from src.etl.validate import TableValidationResult
 
 
 def test_calculate_line_amounts_and_discount() -> None:
@@ -251,3 +256,89 @@ def test_fact_sales_load_shape_is_idempotent_safe() -> None:
     # Documented upsert targets remain the load helpers used by the pipeline.
     assert "source_order_item_id" in (replace_fact_sales.__doc__ or "")
     assert "delivery_id" in (replace_fact_delivery.__doc__ or "")
+
+
+def test_run_etl_quality_gate_below_threshold_skips_warehouse_load() -> None:
+    """A required table below 95% must fail the run and skip warehouse load."""
+    assert QUALITY_THRESHOLD == 95.0
+
+    failing_table = "customers"
+    results: dict[str, TableValidationResult] = {}
+    for table in REQUIRED_QUALITY_TABLES:
+        if table == failing_table:
+            results[table] = TableValidationResult(
+                table_name=table,
+                valid=pd.DataFrame({"id": list(range(9))}),
+                rejected=pd.DataFrame({"id": [9]}),
+                rule_failures={"sample_rule": 1},
+            )
+            continue
+        results[table] = TableValidationResult(
+            table_name=table,
+            valid=pd.DataFrame({"id": [0]}),
+            rejected=pd.DataFrame(),
+        )
+
+    assert results[failing_table].quality_score == 90.0
+    assert results[failing_table].total_count == 10
+    assert all(
+        results[table].quality_score == 100.0
+        for table in REQUIRED_QUALITY_TABLES
+        if table != failing_table
+    )
+
+    extracted = {table: pd.DataFrame({"id": [0]}) for table in REQUIRED_QUALITY_TABLES}
+    engine = MagicMock()
+    engine.begin.return_value.__enter__.return_value = MagicMock()
+    engine.begin.return_value.__exit__.return_value = None
+    call_order: list[str] = []
+
+    def _record_dq(*_args, **_kwargs) -> None:
+        call_order.append("record_data_quality_results")
+
+    def _finish(*_args, **_kwargs) -> None:
+        call_order.append("finish_pipeline_run")
+
+    with (
+        patch("src.etl.pipeline.setup_etl_logging"),
+        patch("src.etl.pipeline.get_engine", return_value=engine),
+        patch("src.etl.pipeline.ensure_quality_score_column"),
+        patch("src.etl.pipeline.start_pipeline_run", return_value=42),
+        patch("src.etl.pipeline.extract_all", return_value=extracted),
+        patch("src.etl.pipeline.load_raw_tables"),
+        patch("src.etl.pipeline.validate_all", return_value=results),
+        patch("src.etl.pipeline.REJECTED_DATA_DIR") as mock_reject_dir,
+        patch("src.etl.pipeline.write_rejected_records"),
+        patch(
+            "src.etl.pipeline.record_data_quality_results",
+            side_effect=_record_dq,
+        ) as mock_record_dq,
+        patch(
+            "src.etl.pipeline.finish_pipeline_run",
+            side_effect=_finish,
+        ) as mock_finish,
+        patch("src.etl.pipeline.load_staging_tables") as mock_stage,
+        patch("src.etl.pipeline.load_dimensions") as mock_dims,
+        patch("src.etl.pipeline.transform_all") as mock_transform,
+        patch("src.etl.pipeline.replace_fact_sales") as mock_sales,
+        patch("src.etl.pipeline.replace_fact_delivery") as mock_delivery,
+    ):
+        mock_reject_dir.mkdir.return_value = None
+        exit_code = run_etl()
+
+    assert exit_code == 1
+    mock_stage.assert_not_called()
+    mock_dims.assert_not_called()
+    mock_transform.assert_not_called()
+    mock_sales.assert_not_called()
+    mock_delivery.assert_not_called()
+    mock_record_dq.assert_called_once()
+    mock_finish.assert_called_once()
+    finish_kwargs = mock_finish.call_args.kwargs
+    assert finish_kwargs["status"] == "FAILED"
+    assert finish_kwargs["records_loaded"] == 0
+    error_message = finish_kwargs["error_message"]
+    assert failing_table in error_message
+    assert "90.00%" in error_message
+    assert "95.00%" in error_message
+    assert call_order == ["record_data_quality_results", "finish_pipeline_run"]

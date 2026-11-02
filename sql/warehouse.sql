@@ -197,6 +197,109 @@ CREATE TABLE IF NOT EXISTS warehouse.fact_sales (
 COMMENT ON TABLE warehouse.fact_sales IS
     'Sales fact at order-line grain. ONE ROW = ONE PRODUCT LINE WITHIN ONE CUSTOMER ORDER. unit_price and *_amount are in the transaction currency (currency_key). *_amount_inr are historical FX reporting measures from exchange_rates on the order date — not dim_currency.rate_to_inr.';
 
+-- Safe for databases created before historical INR reporting columns existed.
+-- CREATE TABLE IF NOT EXISTS does not add columns to an existing fact_sales;
+-- these ALTERs make re-applying warehouse.sql upgrade older warehouses without
+-- dropping data. No-ops when the columns are already present (fresh or upgraded).
+ALTER TABLE warehouse.fact_sales
+    ADD COLUMN IF NOT EXISTS gross_amount_inr NUMERIC(14, 2);
+ALTER TABLE warehouse.fact_sales
+    ADD COLUMN IF NOT EXISTS discount_amount_inr NUMERIC(14, 2);
+ALTER TABLE warehouse.fact_sales
+    ADD COLUMN IF NOT EXISTS net_amount_inr NUMERIC(14, 2);
+ALTER TABLE warehouse.fact_sales
+    ADD COLUMN IF NOT EXISTS cost_amount_inr NUMERIC(14, 2);
+ALTER TABLE warehouse.fact_sales
+    ADD COLUMN IF NOT EXISTS profit_amount_inr NUMERIC(14, 2);
+
+-- Upgrade path for existing fact_sales: ADD COLUMN IF NOT EXISTS skips type
+-- changes when a column already exists. Verify NUMERIC(14,2) and attach the
+-- same INR CHECKs as the CREATE TABLE definition (no profit_amount_inr CHECK).
+-- ADD CONSTRAINT validates existing rows (no NOT VALID).
+DO $$
+DECLARE
+    col_name     text;
+    actual_type  text;
+    chk_name     text;
+    chk_expr     text;
+    actual_def   text;
+    actual_norm  text;
+    expected_norm text;
+BEGIN
+    FOREACH col_name IN ARRAY ARRAY[
+        'gross_amount_inr',
+        'discount_amount_inr',
+        'net_amount_inr',
+        'cost_amount_inr',
+        'profit_amount_inr'
+    ]
+    LOOP
+        SELECT format_type(a.atttypid, a.atttypmod)
+        INTO actual_type
+        FROM pg_catalog.pg_attribute a
+        WHERE a.attrelid = 'warehouse.fact_sales'::regclass
+          AND a.attname = col_name
+          AND a.attnum > 0
+          AND NOT a.attisdropped;
+
+        IF actual_type IS NULL THEN
+            RAISE EXCEPTION
+                'warehouse.fact_sales.% is missing; expected numeric(14,2)',
+                col_name;
+        END IF;
+
+        IF actual_type IS DISTINCT FROM 'numeric(14,2)' THEN
+            RAISE EXCEPTION
+                'warehouse.fact_sales.% has incompatible type %; expected numeric(14,2). Refusing to alter or convert automatically.',
+                col_name, actual_type;
+        END IF;
+    END LOOP;
+
+    FOR chk_name, chk_expr IN
+        SELECT *
+        FROM (VALUES
+            ('chk_fact_sales_gross_inr',
+             'gross_amount_inr IS NULL OR gross_amount_inr >= 0'),
+            ('chk_fact_sales_discount_inr',
+             'discount_amount_inr IS NULL OR discount_amount_inr >= 0'),
+            ('chk_fact_sales_net_inr',
+             'net_amount_inr IS NULL OR net_amount_inr >= 0'),
+            ('chk_fact_sales_cost_inr',
+             'cost_amount_inr IS NULL OR cost_amount_inr >= 0')
+        ) AS v(conname, expr)
+    LOOP
+        SELECT pg_catalog.pg_get_constraintdef(c.oid)
+        INTO actual_def
+        FROM pg_catalog.pg_constraint c
+        WHERE c.conrelid = 'warehouse.fact_sales'::regclass
+          AND c.conname = chk_name;
+
+        IF actual_def IS NULL THEN
+            EXECUTE format(
+                'ALTER TABLE warehouse.fact_sales ADD CONSTRAINT %I CHECK (%s)',
+                chk_name,
+                chk_expr
+            );
+        ELSE
+            -- pg_get_constraintdef wraps predicates and deparses 0 as (0)::numeric
+            -- on NUMERIC columns; strip only those presentation differences.
+            actual_norm := regexp_replace(lower(actual_def), '\s+', '', 'g');
+            actual_norm := regexp_replace(actual_norm, '[()]', '', 'g');
+            actual_norm := replace(actual_norm, '::numeric', '');
+            expected_norm := regexp_replace(
+                lower('CHECK (' || chk_expr || ')'), '\s+', '', 'g');
+            expected_norm := regexp_replace(expected_norm, '[()]', '', 'g');
+            expected_norm := replace(expected_norm, '::numeric', '');
+
+            IF actual_norm IS DISTINCT FROM expected_norm THEN
+                RAISE EXCEPTION
+                    'warehouse.fact_sales constraint % has incompatible definition "%"; expected CHECK (%). Refusing to drop or replace automatically.',
+                    chk_name, actual_def, chk_expr;
+            END IF;
+        END IF;
+    END LOOP;
+END $$;
+
 CREATE TABLE IF NOT EXISTS warehouse.fact_delivery (
     delivery_key               BIGSERIAL PRIMARY KEY,
     date_key                   INTEGER NOT NULL,
