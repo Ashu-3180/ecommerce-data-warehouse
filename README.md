@@ -8,9 +8,12 @@ ShopSphere is a fictional large-scale omnichannel retailer used as a data-engine
 
 This repository is **Project A** of a larger portfolio. The goal is to show a complete, production-style path from messy source files to an analytics-ready warehouse and dashboard.
 
-## Planned architecture
+## Architecture
 
 CSV-based batch ingestion → Python ETL → PostgreSQL raw/staging layers → data-quality validation → transformation → dimensional data warehouse → analytics SQL → Power BI → pipeline monitoring.
+
+**Flow:** source CSV → `raw` → validate → `staging` → transform → `warehouse` → `analytics`  
+`monitoring` records pipeline runs and data-quality results.
 
 ## Current status
 
@@ -22,10 +25,10 @@ CSV-based batch ingestion → Python ETL → PostgreSQL raw/staging layers → d
 - Full batch ETL: extract → validate → reject → monitor → quality gate → stage → transform → warehouse load
 - Idempotent dimension/fact upserts
 - Focused pytest coverage for validation and transform math
+- Power BI dashboard (`ShopSphere_Analytics.pbix`) with **Executive Overview** and **Sales Analytics** pages
 
 **Not implemented yet**
 
-- Power BI dashboard
 - Pipeline scheduling (Airflow / similar)
 - Docker
 
@@ -33,29 +36,32 @@ CSV-based batch ingestion → Python ETL → PostgreSQL raw/staging layers → d
 
 - Python 3.10+
 - pandas, numpy, Faker, python-dotenv
-- PostgreSQL 18
+- PostgreSQL (local developer instance; `psql` client required)
 - SQLAlchemy 2.x + psycopg (v3)
 - pytest
+- Power BI Desktop (for the committed `.pbix` dashboard)
 
 ## Project layout
 
 ```text
-data/raw/              source CSVs (generator output)
-data/rejected/         rejected rows from validation
-src/config.py          paths, sizes, quality threshold, DB settings
-src/generate_data.py   synthetic source generator
-src/database.py        SQLAlchemy engine + connection test
-src/etl/               extract, validate, rejects, transform, load, pipeline
-sql/                   schemas, warehouse, analytics
-tests/                 focused pytest suite
-logs/                  generator and ETL logs
+.env.example                 environment variable template (copy to .env)
+requirements.txt             Python dependencies
+ShopSphere_Analytics.pbix    Power BI dashboard
+data/raw/                    source CSVs (generator output)
+data/rejected/               rejected rows from validation
+src/config.py                paths, sizes, quality threshold, DB settings
+src/generate_data.py         synthetic source generator
+src/database.py              SQLAlchemy engine + connection test
+src/etl/                     extract, validate, rejects, transform, load, pipeline
+sql/schemas.sql              schemas, raw, staging, monitoring tables
+sql/warehouse.sql            star-schema dimensions and facts
+sql/analytics.sql            BI views over warehouse facts
+sql/README.md                SQL apply order and schema notes
+tests/                       focused pytest suite
+logs/                        generator and ETL logs
 ```
 
-## PostgreSQL architecture
-
-**source CSV → `raw` → validate → `staging` → transform → `warehouse` → `analytics`**
-
-`monitoring` records pipeline runs and data-quality results.
+## PostgreSQL layers
 
 - **raw** — landing zone; loose types; dirty rows allowed; no FKs
 - **staging** — typed validated rows only
@@ -84,6 +90,8 @@ Extract CSVs
 
 If the quality gate fails, **staging / transform / warehouse load are skipped**. Rejected records never enter warehouse facts.
 
+Keep `QUALITY_THRESHOLD=95`. Do not lower the gate to force a load; for a clean demo, set `DIRTY_DATA_RATE=0`, regenerate source CSVs, and re-run ETL.
+
 ### Transformation responsibilities
 
 - Normalize dates and numerics on validated rows
@@ -93,7 +101,8 @@ If the quality gate fails, **staging / transform / warehouse load are skipped**.
   - `net_amount = gross_amount − discount_amount`
   - `cost_amount = quantity × product unit_cost`
   - `profit_amount = net_amount − cost_amount`
-- Join `exchange_rates` by currency + order date to compute INR equivalents for reporting/tests
+- Join `exchange_rates` by currency + order date to compute historical INR equivalents
+- Persist both original-currency amounts and `*_amount_inr` columns on `warehouse.fact_sales`
 - Preserve original currency on warehouse fact amounts (`currency_key` = transaction currency)
 - Do **not** copy `order_total` onto every order-item row
 - Build `fact_delivery` separately at delivery grain
@@ -101,14 +110,15 @@ If the quality gate fails, **staging / transform / warehouse load are skipped**.
 ### Currency conversion approach
 
 - FX rates come only from the `exchange_rates` source table (no hardcoded rate table in transform)
-- Exact date match first; otherwise latest available rate for that currency
-- `dim_currency.rate_to_inr` is refreshed from the latest exchange-rate row per code so analytics views can report in INR
-- Warehouse `fact_sales` stores **original-currency** amounts; analytics multiplies by `dim_currency.rate_to_inr`
+- Exact date match first; otherwise latest available rate for that currency on or before the order date
+- ETL persists historical INR reporting measures on `warehouse.fact_sales` (`gross_amount_inr`, `discount_amount_inr`, `net_amount_inr`, `cost_amount_inr`, `profit_amount_inr`)
+- Analytics views report INR by summing those persisted `*_amount_inr` columns
+- `dim_currency.rate_to_inr` is refreshed from the latest exchange-rate row per currency as a **reference** rate only — it is not the historical conversion source used by analytics
 
 ### Warehouse loading responsibilities
 
 - Upsert `dim_date`, `dim_customer`, `dim_product`, `dim_store`
-- Refresh `dim_currency` rates from exchange rates
+- Refresh `dim_currency` reference rates from exchange rates
 - Use seeded `dim_channel` / `dim_payment_method` (from `sql/warehouse.sql`)
 - Upsert `fact_sales` on `source_order_item_id`
 - Upsert `fact_delivery` on `delivery_id`
@@ -130,6 +140,44 @@ They are also summarized in `monitoring.data_quality_results`.
 - Raw/staging tables are truncated and reloaded each successful pass through those stages
 - A second successful run updates existing warehouse rows instead of blindly duplicating them
 
+## Analytics views and Power BI
+
+After a successful ETL run, query the views in schema `analytics` (see `sql/analytics.sql`):
+
+| View | Purpose |
+|---|---|
+| `monthly_sales` | Monthly sales, orders, units, profit (INR) |
+| `category_performance` | Sales by product category (INR) |
+| `product_performance` | Sales by product (INR) |
+| `store_performance` | Sales by store / fulfillment location (INR) |
+| `channel_performance` | Sales by sales channel (INR) |
+| `customer_performance` | Sales by customer (INR) |
+| `delivery_performance` | Delivery counts and averages by type, status, channel group |
+
+The committed dashboard `ShopSphere_Analytics.pbix` has two pages:
+
+- **Executive Overview** — high-level KPIs and trends from analytics views such as `monthly_sales`, `category_performance`, and `channel_performance`
+- **Sales Analytics** — deeper sales breakdowns using views such as `monthly_sales`, `category_performance`, and `product_performance`
+
+Open the `.pbix` in Power BI Desktop and point the data source at your local `shopsphere` PostgreSQL database (credentials stay in your local Power BI / `.env` setup — never commit secrets).
+
+## Prerequisites
+
+- Python 3.10+
+- PostgreSQL server with a local database you can create and connect to
+- `psql` on your PATH (or invoke `psql` with its full install path)
+- Power BI Desktop if you want to open `ShopSphere_Analytics.pbix`
+
+## First-run checklist
+
+1. **Environment** — create a venv, install dependencies, copy `.env.example` to `.env`, set `POSTGRES_PASSWORD`.
+2. **Database** — create the `shopsphere` database.
+3. **SQL init** — apply `sql/schemas.sql`, then `sql/warehouse.sql`, then `sql/analytics.sql` (connected to `shopsphere`).
+4. **Connection test** — `python -m src.database`.
+5. **Generate data** — `python src/generate_data.py` (use `DIRTY_DATA_RATE=0` for a clean demo load).
+6. **Run ETL** — `python -m src.etl` (quality gate remains 95%).
+7. **Verify analytics** — query `analytics.monthly_sales` (or open `ShopSphere_Analytics.pbix`).
+
 ## Setup
 
 ```powershell
@@ -140,7 +188,7 @@ pip install -r requirements.txt
 copy .env.example .env
 ```
 
-Edit `.env` and set your real `POSTGRES_PASSWORD`. Apply SQL once:
+Edit `.env` and set your real `POSTGRES_PASSWORD`. Ensure `psql` is on PATH, then create the database and apply SQL once:
 
 ```powershell
 psql -U postgres -d postgres -c "CREATE DATABASE shopsphere;"
@@ -148,6 +196,10 @@ psql -U postgres -d shopsphere -f sql/schemas.sql
 psql -U postgres -d shopsphere -f sql/warehouse.sql
 psql -U postgres -d shopsphere -f sql/analytics.sql
 ```
+
+If `psql` is not on PATH, call it with the full path to `psql.exe` on your machine (same `-U` / `-d` / `-f` arguments). You will be prompted for the Postgres password unless you use a local credential helper such as `.pgpass`.
+
+For older databases that pre-date the historical INR columns, re-apply `sql/warehouse.sql` (safe `ADD COLUMN IF NOT EXISTS` upgrades) and then `sql/analytics.sql`. Details are in `sql/README.md`.
 
 ## Run the data generator
 
