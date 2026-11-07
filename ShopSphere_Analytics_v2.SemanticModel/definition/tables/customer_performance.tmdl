@@ -1,0 +1,93 @@
+table customer_performance
+	lineageTag: 4bbf0c3f-4e54-4608-bac4-8fe765c09cba
+
+	column customer_id
+		dataType: string
+		lineageTag: 43f3ea04-97f5-4248-9f87-b949d56690b1
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column first_name
+		dataType: string
+		lineageTag: 1715a993-cbfb-423b-8a66-bbcf984ed94c
+		summarizeBy: none
+		sourceColumn: first_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_name
+		dataType: string
+		lineageTag: 79725f85-711b-4dc2-8b86-9412442bb0cf
+		summarizeBy: none
+		sourceColumn: last_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column country
+		dataType: string
+		lineageTag: 96aff3a7-1b0c-4a61-86e3-070e679c0c9c
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_segment
+		dataType: string
+		lineageTag: 32ebf91e-436e-45ea-9f60-6b71031ce55f
+		summarizeBy: none
+		sourceColumn: customer_segment
+
+		annotation SummarizationSetBy = Automatic
+
+	column sales
+		dataType: double
+		lineageTag: 42ff04e8-9d13-4c8c-8e20-2d3403b12f53
+		summarizeBy: sum
+		sourceColumn: sales
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column orders
+		dataType: int64
+		formatString: 0
+		lineageTag: ed8d8e4e-a028-4c77-bf8c-74b79ee82dcb
+		summarizeBy: sum
+		sourceColumn: orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column units
+		dataType: int64
+		formatString: 0
+		lineageTag: 94713ece-5dac-4281-8a3d-1bd9b7443a2f
+		summarizeBy: sum
+		sourceColumn: units
+
+		annotation SummarizationSetBy = Automatic
+
+	column profit
+		dataType: double
+		lineageTag: 199c2373-80a2-43f3-8c27-b77851e2ec26
+		summarizeBy: sum
+		sourceColumn: profit
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition customer_performance = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost:5432", "shopsphere", [HierarchicalNavigation=true]),
+				    analytics = Source{[Schema="analytics"]}[Data],
+				    customer_performance1 = analytics{[Name="customer_performance"]}[Data]
+				in
+				    customer_performance1
+
+	annotation PBI_ResultType = Table
+

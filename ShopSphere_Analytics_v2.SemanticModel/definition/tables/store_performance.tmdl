@@ -1,0 +1,93 @@
+table store_performance
+	lineageTag: 0578f3fd-7d5d-42b7-a71f-90367ed33298
+
+	column store_id
+		dataType: string
+		lineageTag: b0c40c83-c294-43e2-834f-ec1b6243346c
+		summarizeBy: none
+		sourceColumn: store_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column store_name
+		dataType: string
+		lineageTag: 8a2c7145-7d00-44de-aec5-5a9515874659
+		summarizeBy: none
+		sourceColumn: store_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column store_type
+		dataType: string
+		lineageTag: 6b80d5e3-cff0-49f9-88f2-9ea45807c17a
+		summarizeBy: none
+		sourceColumn: store_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column country
+		dataType: string
+		lineageTag: a5468959-27bc-4d8f-85cd-6c91f2482a61
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = Automatic
+
+	column city
+		dataType: string
+		lineageTag: c3b6773b-e0fa-4faa-9f96-430004f5ffc9
+		summarizeBy: none
+		sourceColumn: city
+
+		annotation SummarizationSetBy = Automatic
+
+	column sales
+		dataType: double
+		lineageTag: d69612b0-6fc5-4c80-8623-fc685af0fe01
+		summarizeBy: sum
+		sourceColumn: sales
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column orders
+		dataType: int64
+		formatString: 0
+		lineageTag: 86bb2170-a7e6-475f-8184-0b50305cadb4
+		summarizeBy: sum
+		sourceColumn: orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column units
+		dataType: int64
+		formatString: 0
+		lineageTag: e67e0ed7-d41a-4f86-8794-98696947b75e
+		summarizeBy: sum
+		sourceColumn: units
+
+		annotation SummarizationSetBy = Automatic
+
+	column profit
+		dataType: double
+		lineageTag: 3644a309-0616-48c2-94f0-93fb9a31e425
+		summarizeBy: sum
+		sourceColumn: profit
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition store_performance = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost:5432", "shopsphere", [HierarchicalNavigation=true]),
+				    analytics = Source{[Schema="analytics"]}[Data],
+				    store_performance1 = analytics{[Name="store_performance"]}[Data]
+				in
+				    store_performance1
+
+	annotation PBI_ResultType = Table
+

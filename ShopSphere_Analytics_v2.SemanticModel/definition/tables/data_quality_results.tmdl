@@ -1,0 +1,91 @@
+table data_quality_results
+	lineageTag: 1e42a8d4-d1db-4378-a738-991b3367f12c
+
+	column quality_result_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 99bbb0ba-5208-409f-a82f-c35410e2a32a
+		summarizeBy: sum
+		sourceColumn: quality_result_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column run_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 1563fa10-159d-47ab-98ab-c5175715206c
+		summarizeBy: none
+		sourceColumn: run_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column table_name
+		dataType: string
+		lineageTag: 01bffafa-8e23-400d-8c17-eff745a3c02d
+		summarizeBy: none
+		sourceColumn: table_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column rule_name
+		dataType: string
+		lineageTag: c27d8d35-6ebe-4ba0-9ac3-c158a4c3b7a9
+		summarizeBy: none
+		sourceColumn: rule_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column records_checked
+		dataType: int64
+		formatString: 0
+		lineageTag: 136f8fd3-fc47-4839-8ded-9210496b2509
+		summarizeBy: sum
+		sourceColumn: records_checked
+
+		annotation SummarizationSetBy = Automatic
+
+	column records_failed
+		dataType: int64
+		formatString: 0
+		lineageTag: f785ac0b-d680-431a-a2d9-86b3046fa1b0
+		summarizeBy: sum
+		sourceColumn: records_failed
+
+		annotation SummarizationSetBy = Automatic
+
+	column failure_rate
+		dataType: double
+		lineageTag: 29aa83f0-ced4-4298-903e-1ef39bd77948
+		summarizeBy: sum
+		sourceColumn: failure_rate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column created_at
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 65ae4fcf-5868-4102-92c6-79089c227921
+		summarizeBy: none
+		sourceColumn: created_at
+
+		variation Variation
+			isDefault
+			relationship: 7d4e0fe4-1a61-4937-b805-5149f822aeef
+			defaultHierarchy: LocalDateTable_3b1ff168-1863-418d-9c0b-5590bb79fa38.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	partition data_quality_results = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost:5432", "shopsphere", [HierarchicalNavigation=true]),
+				    monitoring = Source{[Schema="monitoring"]}[Data],
+				    data_quality_results1 = monitoring{[Name="data_quality_results"]}[Data]
+				in
+				    data_quality_results1
+
+	annotation PBI_ResultType = Table
+

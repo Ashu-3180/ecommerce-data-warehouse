@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "ShopSphere_Analytics_v2"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "9e860ed4-b66d-4407-9b84-aa62d3804484"
+  }
+}

@@ -1,0 +1,17 @@
+EVALUATE
+ROW(
+    "Revenue", [Total Revenue],
+    "Profit", [Total Profit],
+    "Orders", [Total Orders],
+    "Units", [Units Sold],
+    "Profit Margin", [Profit Margin %],
+    "AOV", [Average Order Value],
+    "Purchasing Customers", [Purchasing Customers],
+    "Customer Revenue", [Customer Revenue],
+    "Customer Profit", [Customer Profit],
+    "Store Revenue", [Store Revenue],
+    "Store Profit", [Store Profit],
+    "Total Deliveries", [Total Deliveries],
+    "Average Delivery Time", [Average Delivery Time (Minutes)],
+    "Average Delivery Distance", [Average Delivery Distance (KM)]
+)

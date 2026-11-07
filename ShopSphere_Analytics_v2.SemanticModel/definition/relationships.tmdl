@@ -1,0 +1,21 @@
+relationship 7d4e0fe4-1a61-4937-b805-5149f822aeef
+	joinOnDateBehavior: datePartOnly
+	fromColumn: data_quality_results.created_at
+	toColumn: LocalDateTable_3b1ff168-1863-418d-9c0b-5590bb79fa38.Date
+
+relationship 5580f9cb-4aa7-4f9f-8131-ba5cd0a04cd2
+	joinOnDateBehavior: datePartOnly
+	fromColumn: pipeline_runs.started_at
+	toColumn: LocalDateTable_5901dd10-84a7-4825-aedb-2ee9f14becd4.Date
+
+relationship 2ae11624-e13e-4225-89ee-3af4e484b2c9
+	joinOnDateBehavior: datePartOnly
+	fromColumn: pipeline_runs.completed_at
+	toColumn: LocalDateTable_b1a1dce6-f0da-4bd8-b956-fb47c003c72e.Date
+
+relationship bb68cb7a-a015-48c2-9907-559542abd003
+	fromColumn: data_quality_results.run_id
+	toColumn: pipeline_runs.run_id
+
+	annotation PBI_IsFromSource = FS
+

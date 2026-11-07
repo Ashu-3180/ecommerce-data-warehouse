@@ -1,0 +1,32 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-IN
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["data_quality_results","pipeline_runs","category_performance","channel_performance","customer_performance","delivery_performance","monthly_sales","product_performance","store_performance"]
+
+annotation PBI_ProTooling = ["DaxQueryView_Desktop","DevMode"]
+
+ref table data_quality_results
+ref table DateTableTemplate_f0b6271e-c0a5-4830-aa0a-6efee519b7ab
+ref table LocalDateTable_3b1ff168-1863-418d-9c0b-5590bb79fa38
+ref table pipeline_runs
+ref table LocalDateTable_5901dd10-84a7-4825-aedb-2ee9f14becd4
+ref table LocalDateTable_b1a1dce6-f0da-4bd8-b956-fb47c003c72e
+ref table category_performance
+ref table channel_performance
+ref table customer_performance
+ref table delivery_performance
+ref table monthly_sales
+ref table product_performance
+ref table store_performance
+ref table _Measures
+
+ref cultureInfo en-US
+
