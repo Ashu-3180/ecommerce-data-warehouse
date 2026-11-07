@@ -1,0 +1,77 @@
+table channel_performance
+	lineageTag: e5068b18-4d9d-49f4-8f30-8aa7de7b9c60
+
+	column channel_code
+		dataType: string
+		lineageTag: 849d70b4-60c8-47a6-bca3-2f40671fd921
+		summarizeBy: none
+		sourceColumn: channel_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column channel_name
+		dataType: string
+		lineageTag: b5fbda44-6bba-4376-ba82-8a148379f65f
+		summarizeBy: none
+		sourceColumn: channel_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column channel_group
+		dataType: string
+		lineageTag: 014e6c16-2d63-4cc2-a2e0-0d37a9931109
+		summarizeBy: none
+		sourceColumn: channel_group
+
+		annotation SummarizationSetBy = Automatic
+
+	column sales
+		dataType: double
+		formatString: "₹#,0.00"
+		lineageTag: 3afdbdda-f482-48fd-9ffc-630e0721c601
+		summarizeBy: sum
+		sourceColumn: sales
+
+		annotation SummarizationSetBy = Automatic
+
+
+	column orders
+		dataType: int64
+		formatString: "#,0"
+		lineageTag: f3739f43-466c-410e-b759-b4723419ff66
+		summarizeBy: sum
+		sourceColumn: orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column units
+		dataType: int64
+		formatString: "#,0"
+		lineageTag: f186b471-983c-4608-9890-f85f1838e5cb
+		summarizeBy: sum
+		sourceColumn: units
+
+		annotation SummarizationSetBy = Automatic
+
+	column profit
+		dataType: double
+		formatString: "₹#,0.00"
+		lineageTag: 1a4ba518-b388-472b-b7f2-7ac9a794772b
+		summarizeBy: sum
+		sourceColumn: profit
+
+		annotation SummarizationSetBy = Automatic
+
+
+	partition channel_performance = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost:5432", "shopsphere", [HierarchicalNavigation=true]),
+				    analytics = Source{[Schema="analytics"]}[Data],
+				    channel_performance1 = analytics{[Name="channel_performance"]}[Data]
+				in
+				    channel_performance1
+
+	annotation PBI_ResultType = Table
+

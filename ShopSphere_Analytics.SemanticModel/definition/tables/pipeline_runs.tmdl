@@ -1,0 +1,146 @@
+table pipeline_runs
+	lineageTag: d6d59fc4-9bb4-469a-99c4-00fb09892f7e
+
+	column run_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 4a3fcae5-2c1d-4036-a4ec-2a5e83f4eefb
+		summarizeBy: none
+		sourceColumn: run_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column pipeline_name
+		dataType: string
+		lineageTag: f781875e-14fb-4029-9c3f-fcc3a184720c
+		summarizeBy: none
+		sourceColumn: pipeline_name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column started_at
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 8df8cc1f-54f6-4ea8-8f23-9aafdb3f634e
+		summarizeBy: none
+		sourceColumn: started_at
+
+		variation Variation
+			isDefault
+			relationship: 5580f9cb-4aa7-4f9f-8131-ba5cd0a04cd2
+			defaultHierarchy: LocalDateTable_5901dd10-84a7-4825-aedb-2ee9f14becd4.'Date Hierarchy'
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column completed_at
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 5452be1b-9104-4a96-9324-14adcf5ec833
+		summarizeBy: none
+		sourceColumn: completed_at
+
+		variation Variation
+			isDefault
+			relationship: 2ae11624-e13e-4225-89ee-3af4e484b2c9
+			defaultHierarchy: LocalDateTable_b1a1dce6-f0da-4bd8-b956-fb47c003c72e.'Date Hierarchy'
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		dataType: string
+		lineageTag: 70109b89-7a84-4720-bc58-17f27600c9f0
+		summarizeBy: none
+		sourceColumn: status
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column records_extracted
+		dataType: int64
+		formatString: "#,0"
+		lineageTag: 66a6a125-52f3-4df2-9ed5-30625aa1da1f
+		summarizeBy: sum
+		sourceColumn: records_extracted
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column records_validated
+		dataType: int64
+		formatString: "#,0"
+		lineageTag: 1ccddec2-fc2d-4e99-87f9-39842851c624
+		summarizeBy: sum
+		sourceColumn: records_validated
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column records_rejected
+		dataType: int64
+		formatString: "#,0"
+		lineageTag: ee77c37c-2fd0-41f4-aabc-a2462f8f0b5c
+		summarizeBy: sum
+		sourceColumn: records_rejected
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column records_loaded
+		dataType: int64
+		formatString: "#,0"
+		lineageTag: 93b2b1fc-0736-410e-a83b-6143ff470a08
+		summarizeBy: sum
+		sourceColumn: records_loaded
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column quality_score
+		dataType: double
+		formatString: "0.00"
+		lineageTag: 12afae1b-e1d0-46e9-9f57-d5fc1dabb22a
+		summarizeBy: sum
+		sourceColumn: quality_score
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+
+	column error_message
+		dataType: string
+		lineageTag: 02218e7d-4c94-4794-914e-9370a2551aa1
+		summarizeBy: none
+		sourceColumn: error_message
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition pipeline_runs = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost:5432", "shopsphere", [HierarchicalNavigation=true]),
+				    monitoring = Source{[Schema="monitoring"]}[Data],
+				    pipeline_runs1 = monitoring{[Name="pipeline_runs"]}[Data]
+				in
+				    pipeline_runs1
+
+	changedProperty = IsHidden
+
+	annotation PBI_ResultType = Table
+

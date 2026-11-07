@@ -25,7 +25,7 @@ CSV-based batch ingestion → Python ETL → PostgreSQL raw/staging layers → d
 - Full batch ETL: extract → validate → reject → monitor → quality gate → stage → transform → warehouse load
 - Idempotent dimension/fact upserts
 - Focused pytest coverage for validation and transform math
-- Power BI dashboard (`ShopSphere_Analytics.pbix`) with **Executive Overview** and **Sales Analytics** pages
+- Power BI dashboard project (`ShopSphere_Analytics.pbip`): five pages, 72 visuals, and 37 DAX measures
 
 **Not implemented yet**
 
@@ -39,14 +39,16 @@ CSV-based batch ingestion → Python ETL → PostgreSQL raw/staging layers → d
 - PostgreSQL (local developer instance; `psql` client required)
 - SQLAlchemy 2.x + psycopg (v3)
 - pytest
-- Power BI Desktop (for the committed `.pbix` dashboard)
+- Power BI Desktop (to open `ShopSphere_Analytics.pbip`)
 
 ## Project layout
 
 ```text
 .env.example                 environment variable template (copy to .env)
 requirements.txt             Python dependencies
-ShopSphere_Analytics.pbix    Power BI dashboard
+ShopSphere_Analytics.pbip                 Power BI project (open this)
+ShopSphere_Analytics.Report/             report definition (five pages)
+ShopSphere_Analytics.SemanticModel/      semantic model and DAX measures
 data/raw/                    source CSVs (generator output)
 data/rejected/               rejected rows from validation
 src/config.py                paths, sizes, quality threshold, DB settings
@@ -154,19 +156,24 @@ After a successful ETL run, query the views in schema `analytics` (see `sql/anal
 | `customer_performance` | Sales by customer (INR) |
 | `delivery_performance` | Delivery counts and averages by type, status, channel group |
 
-The committed dashboard `ShopSphere_Analytics.pbix` has two pages:
+The active dashboard is the Power BI project `ShopSphere_Analytics.pbip`. It contains five pages and 72 visuals. The semantic model defines 37 DAX measures (revenue, profit, orders, customer, store, delivery, pipeline, and data-quality metrics) over the PostgreSQL analytics and monitoring tables.
 
-- **Executive Overview** — high-level KPIs and trends from analytics views such as `monthly_sales`, `category_performance`, and `channel_performance`
-- **Sales Analytics** — deeper sales breakdowns using views such as `monthly_sales`, `category_performance`, and `product_performance`
+| Page | Role |
+|---|---|
+| Executive Overview | Portfolio-level sales, profit, and channel/category KPIs |
+| Sales Analytics | Product, category, and monthly sales breakdowns |
+| Customer Analytics | Customer and segment performance |
+| Operations | Store and delivery operations |
+| Data Quality & Pipeline | Pipeline runs and data-quality results |
 
-Open the `.pbix` in Power BI Desktop and point the data source at your local `shopsphere` PostgreSQL database (credentials stay in your local Power BI / `.env` setup — never commit secrets).
+Open `ShopSphere_Analytics.pbip` in Power BI Desktop from the repository root. The report is bound to `ShopSphere_Analytics.SemanticModel`, which loads `shopsphere` from PostgreSQL at `localhost:5432`. Power BI prompts for the database credentials locally; do not store them in the project files or commit `.env`. Refresh after a successful ETL load so the views have rows.
 
 ## Prerequisites
 
 - Python 3.10+
 - PostgreSQL server with a local database you can create and connect to
 - `psql` on your PATH (or invoke `psql` with its full install path)
-- Power BI Desktop if you want to open `ShopSphere_Analytics.pbix`
+- Power BI Desktop if you want to open `ShopSphere_Analytics.pbip`
 
 ## First-run checklist
 
@@ -176,7 +183,7 @@ Open the `.pbix` in Power BI Desktop and point the data source at your local `sh
 4. **Connection test** — `python -m src.database`.
 5. **Generate data** — `python src/generate_data.py` (use `DIRTY_DATA_RATE=0` for a clean demo load).
 6. **Run ETL** — `python -m src.etl` (quality gate remains 95%).
-7. **Verify analytics** — query `analytics.monthly_sales` (or open `ShopSphere_Analytics.pbix`).
+7. **Verify analytics** — query `analytics.monthly_sales`, or open `ShopSphere_Analytics.pbip` and refresh.
 
 ## Setup
 

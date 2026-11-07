@@ -1,0 +1,61 @@
+table category_performance
+	lineageTag: 21938a91-4b86-46e6-8c19-a6ec9dd5bcce
+
+	column category
+		dataType: string
+		lineageTag: 4f0da4ef-09f1-45de-90ff-9bcb6d6743cd
+		summarizeBy: none
+		sourceColumn: category
+
+		annotation SummarizationSetBy = Automatic
+
+	column sales
+		dataType: double
+		formatString: "₹#,0.00"
+		lineageTag: fd6a36d0-544d-40e2-a344-965020f2a707
+		summarizeBy: sum
+		sourceColumn: sales
+
+		annotation SummarizationSetBy = Automatic
+
+
+	column units
+		dataType: int64
+		formatString: "#,0"
+		lineageTag: cca35a99-a8e2-470a-aee0-04e32ce85417
+		summarizeBy: sum
+		sourceColumn: units
+
+		annotation SummarizationSetBy = Automatic
+
+	column orders
+		dataType: int64
+		formatString: "#,0"
+		lineageTag: 4892b26b-50ba-450a-a032-117f31376707
+		summarizeBy: sum
+		sourceColumn: orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column profit
+		dataType: double
+		formatString: "₹#,0.00"
+		lineageTag: 35588b50-2dd0-46a9-afff-825754171c36
+		summarizeBy: sum
+		sourceColumn: profit
+
+		annotation SummarizationSetBy = Automatic
+
+
+	partition category_performance = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost:5432", "shopsphere", [HierarchicalNavigation=true]),
+				    analytics = Source{[Schema="analytics"]}[Data],
+				    category_performance1 = analytics{[Name="category_performance"]}[Data]
+				in
+				    category_performance1
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,101 @@
+table monthly_sales
+	lineageTag: b521ad31-0667-4e6e-b46c-8d283b3dcfdf
+
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: aeb089bb-36ef-4d67-a4bb-234cf1188bcf
+		summarizeBy: sum
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column month
+		dataType: int64
+		formatString: 0
+		lineageTag: 4052e649-955e-4587-afee-8d64b8049507
+		summarizeBy: sum
+		sourceColumn: month
+
+		annotation SummarizationSetBy = Automatic
+
+	column month_name
+		dataType: string
+		lineageTag: 764829a9-4709-42e7-8015-b607bc63dc90
+		summarizeBy: none
+		sourceColumn: month_name
+		sortByColumn: month
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column YearMonthSort = [year] * 100 + [month]
+		dataType: int64
+		formatString: 0
+		lineageTag: 6a4e8c21-1b70-4f5d-9c33-7d2b6e9a4c18
+		summarizeBy: none
+		isHidden
+
+		annotation SummarizationSetBy = User
+
+	column YearMonth = FORMAT([year], "0000") & "-" & FORMAT([month], "00")
+		dataType: string
+		lineageTag: 7b5f9d32-2c81-4e6e-8d44-8e3c7f0b5d29
+		summarizeBy: none
+		sortByColumn: YearMonthSort
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = User
+
+	column sales
+		dataType: double
+		formatString: "₹#,0.00"
+		lineageTag: ff71b4e2-facb-4c99-b49c-9257b2448ae5
+		summarizeBy: sum
+		sourceColumn: sales
+
+		annotation SummarizationSetBy = Automatic
+
+
+	column orders
+		dataType: int64
+		formatString: "#,0"
+		lineageTag: 047090a6-49d3-45f3-a236-a9787426fed8
+		summarizeBy: sum
+		sourceColumn: orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column units
+		dataType: int64
+		formatString: "#,0"
+		lineageTag: 244cd702-2133-4f29-9384-6498dc929d74
+		summarizeBy: sum
+		sourceColumn: units
+
+		annotation SummarizationSetBy = Automatic
+
+	column profit
+		dataType: double
+		formatString: "₹#,0.00"
+		lineageTag: a3967af9-f1a4-429b-bcb2-77b0d76aada3
+		summarizeBy: sum
+		sourceColumn: profit
+
+		annotation SummarizationSetBy = Automatic
+
+
+	partition monthly_sales = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost:5432", "shopsphere", [HierarchicalNavigation=true]),
+				    analytics = Source{[Schema="analytics"]}[Data],
+				    monthly_sales1 = analytics{[Name="monthly_sales"]}[Data]
+				in
+				    monthly_sales1
+
+	annotation PBI_ResultType = Table
+

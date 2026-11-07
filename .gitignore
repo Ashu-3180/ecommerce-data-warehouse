@@ -1,8 +1,13 @@
 # Virtual environments
 .venv/
+.venv*/
 venv/
 env/
 ENV/
+
+# Power BI machine-specific settings and cached data
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
 
 # Python
 __pycache__/

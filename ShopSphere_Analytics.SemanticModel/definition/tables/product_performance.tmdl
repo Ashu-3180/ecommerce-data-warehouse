@@ -1,0 +1,85 @@
+table product_performance
+	lineageTag: 3598bf2c-6f7f-4c21-bb70-931242e6d66e
+
+	column product_id
+		dataType: string
+		lineageTag: 60c4c773-694d-44ec-9353-0a7cfa8e4915
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_name
+		dataType: string
+		lineageTag: aa4ab9a0-4df0-41d7-9fda-a385eb7f510a
+		summarizeBy: none
+		sourceColumn: product_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column category
+		dataType: string
+		lineageTag: 4f86a462-0756-4e72-bc4d-59590df5a042
+		summarizeBy: none
+		sourceColumn: category
+
+		annotation SummarizationSetBy = Automatic
+
+	column brand
+		dataType: string
+		lineageTag: 9eb509ce-2c67-42bf-84a2-37bb6d1d659a
+		summarizeBy: none
+		sourceColumn: brand
+
+		annotation SummarizationSetBy = Automatic
+
+	column sales
+		dataType: double
+		formatString: "₹#,0.00"
+		lineageTag: 15c5b8df-1e5f-45f3-9ddc-607fc059971f
+		summarizeBy: sum
+		sourceColumn: sales
+
+		annotation SummarizationSetBy = Automatic
+
+
+	column units
+		dataType: int64
+		formatString: "#,0"
+		lineageTag: 75678745-b4a3-4ebb-b7f0-ad6013f3021b
+		summarizeBy: sum
+		sourceColumn: units
+
+		annotation SummarizationSetBy = Automatic
+
+	column orders
+		dataType: int64
+		formatString: "#,0"
+		lineageTag: 1b139343-c7df-47b1-8cf9-a8b6736f9930
+		summarizeBy: sum
+		sourceColumn: orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column profit
+		dataType: double
+		formatString: "₹#,0.00"
+		lineageTag: bb4aa186-f29f-427e-abf1-4e0ef706ec43
+		summarizeBy: sum
+		sourceColumn: profit
+
+		annotation SummarizationSetBy = Automatic
+
+
+	partition product_performance = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost:5432", "shopsphere", [HierarchicalNavigation=true]),
+				    analytics = Source{[Schema="analytics"]}[Data],
+				    product_performance1 = analytics{[Name="product_performance"]}[Data]
+				in
+				    product_performance1
+
+	annotation PBI_ResultType = Table
+

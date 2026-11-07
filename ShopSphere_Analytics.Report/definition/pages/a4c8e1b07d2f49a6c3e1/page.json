@@ -1,0 +1,516 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "a4c8e1b07d2f49a6c3e1",
+  "displayName": "Customer Analytics",
+  "displayOption": "FitToPage",
+  "height": 1080,
+  "width": 1920,
+  "pageBinding": {
+    "name": "c1a2b3d4e5f60718293a",
+    "type": "Default",
+    "parameters": [],
+    "acceptsFilterContext": "None"
+  },
+  "objects": {
+    "outspace": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#111827'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#111827'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "0000000000000000002b",
+      "target": "0000000000000000002c",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002b",
+      "target": "00000000000000000032",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002b",
+      "target": "00000000000000000034",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002b",
+      "target": "00000000000000000036",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002b",
+      "target": "0000000000000000002d",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002b",
+      "target": "0000000000000000002e",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002b",
+      "target": "0000000000000000002f",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002b",
+      "target": "00000000000000000030",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002b",
+      "target": "00000000000000000031",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002c",
+      "target": "0000000000000000002b",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002c",
+      "target": "00000000000000000032",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002c",
+      "target": "00000000000000000034",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002c",
+      "target": "00000000000000000036",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002c",
+      "target": "0000000000000000002d",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002c",
+      "target": "0000000000000000002e",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002c",
+      "target": "0000000000000000002f",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002c",
+      "target": "00000000000000000030",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002c",
+      "target": "00000000000000000031",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000032",
+      "target": "0000000000000000002b",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000032",
+      "target": "0000000000000000002c",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000032",
+      "target": "00000000000000000034",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000032",
+      "target": "00000000000000000036",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000032",
+      "target": "0000000000000000002d",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000032",
+      "target": "0000000000000000002e",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000032",
+      "target": "0000000000000000002f",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000032",
+      "target": "00000000000000000030",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000032",
+      "target": "00000000000000000031",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000034",
+      "target": "0000000000000000002b",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000034",
+      "target": "0000000000000000002c",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000034",
+      "target": "00000000000000000032",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000034",
+      "target": "00000000000000000036",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000034",
+      "target": "0000000000000000002d",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000034",
+      "target": "0000000000000000002e",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000034",
+      "target": "0000000000000000002f",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000034",
+      "target": "00000000000000000030",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000034",
+      "target": "00000000000000000031",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000036",
+      "target": "0000000000000000002b",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000036",
+      "target": "0000000000000000002c",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000036",
+      "target": "00000000000000000032",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000036",
+      "target": "00000000000000000034",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000036",
+      "target": "0000000000000000002d",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000036",
+      "target": "0000000000000000002e",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000036",
+      "target": "0000000000000000002f",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000036",
+      "target": "00000000000000000030",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000036",
+      "target": "00000000000000000031",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002d",
+      "target": "0000000000000000002b",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002d",
+      "target": "0000000000000000002c",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002d",
+      "target": "00000000000000000032",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002d",
+      "target": "00000000000000000034",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002d",
+      "target": "00000000000000000036",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002d",
+      "target": "0000000000000000002e",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002d",
+      "target": "0000000000000000002f",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002d",
+      "target": "00000000000000000030",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002d",
+      "target": "00000000000000000031",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002e",
+      "target": "0000000000000000002b",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002e",
+      "target": "0000000000000000002c",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002e",
+      "target": "00000000000000000032",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002e",
+      "target": "00000000000000000034",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002e",
+      "target": "00000000000000000036",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002e",
+      "target": "0000000000000000002d",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002e",
+      "target": "0000000000000000002f",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002e",
+      "target": "00000000000000000030",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002e",
+      "target": "00000000000000000031",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002f",
+      "target": "0000000000000000002b",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002f",
+      "target": "0000000000000000002c",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002f",
+      "target": "00000000000000000032",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002f",
+      "target": "00000000000000000034",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002f",
+      "target": "00000000000000000036",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002f",
+      "target": "0000000000000000002d",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002f",
+      "target": "0000000000000000002e",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002f",
+      "target": "00000000000000000030",
+      "type": "DataFilter"
+    },
+    {
+      "source": "0000000000000000002f",
+      "target": "00000000000000000031",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000030",
+      "target": "0000000000000000002b",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000030",
+      "target": "0000000000000000002c",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000030",
+      "target": "00000000000000000032",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000030",
+      "target": "00000000000000000034",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000030",
+      "target": "00000000000000000036",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000030",
+      "target": "0000000000000000002d",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000030",
+      "target": "0000000000000000002e",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000030",
+      "target": "0000000000000000002f",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000030",
+      "target": "00000000000000000031",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000031",
+      "target": "0000000000000000002b",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000031",
+      "target": "0000000000000000002c",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000031",
+      "target": "00000000000000000032",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000031",
+      "target": "00000000000000000034",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000031",
+      "target": "00000000000000000036",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000031",
+      "target": "0000000000000000002d",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000031",
+      "target": "0000000000000000002e",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000031",
+      "target": "0000000000000000002f",
+      "type": "DataFilter"
+    },
+    {
+      "source": "00000000000000000031",
+      "target": "00000000000000000030",
+      "type": "DataFilter"
+    }
+  ]
+}
