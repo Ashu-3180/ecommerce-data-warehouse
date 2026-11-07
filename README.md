@@ -236,3 +236,49 @@ python -m src.database
 ```
 
 Successful output includes `Connection successful.` and the PostgreSQL version string.
+
+## Engineering decisions
+
+The implementation makes several deliberate trade-offs:
+
+- **Batch-first ingestion:** source data is generated as CSV and processed through a Python batch pipeline. Streaming ingestion and orchestration are outside the current scope.
+- **Layer separation:** raw, staging, warehouse, analytics, and monitoring schemas keep ingestion, validation, dimensional modeling, reporting, and operational metadata distinct.
+- **Explicit data-quality gate:** each source table must meet the configured threshold (95% by default). A failed gate stops downstream staging, transformation, and warehouse loading rather than weakening validation.
+- **Traceable rejects:** invalid records are retained as rejected-row CSV output with the failed rule, reason, source identity, run ID, and original record; aggregate results are also written to monitoring tables.
+- **Idempotent warehouse writes:** dimensions and facts use business-key or source-identifier conflict handling so successful reruns update warehouse records instead of blindly duplicating them.
+- **Historical currency reporting:** transaction-currency values are retained alongside INR measures calculated using the exchange-rate history available for the order date. The latest currency dimension rate is reference data, not a substitute for historical conversion.
+
+## Verification
+
+The completed project was verified with:
+
+- **Automated tests:** 8 tests passed in the full pytest suite.
+- **Warehouse:** sales facts are stored at product-line grain; delivery facts are stored separately at delivery-event grain.
+- **Power BI:** the final PBIP report was opened and checked, including all five pages and its PostgreSQL-backed refresh.
+- **Repository:** the final project state was committed to `main`; the working tree was clean and synchronized with `origin/main` at the time of finalization.
+
+The dashboard contains **5 pages, 72 visuals, and 37 DAX measures**:
+
+- Executive Overview
+- Sales Analytics
+- Customer Analytics
+- Operations
+- Data Quality & Pipeline
+
+## Scope and limitations
+
+This is a completed **batch ETL and analytics** portfolio project, not a claim of a fully orchestrated production platform.
+
+The repository does not currently implement:
+
+- Workflow scheduling/orchestration (for example, Apache Airflow)
+- Docker-based packaging or deployment
+- Streaming or near-real-time ingestion
+- A hosted production database or cloud deployment
+
+These are explicit scope boundaries, not hidden dependencies. The project can be run locally using Python, PostgreSQL, and Power BI Desktop.
+
+## Portfolio context
+
+ShopSphere is **Project A** in a broader data-engineering portfolio. It demonstrates source-data generation, batch ingestion, validation, dimensional warehousing, SQL analytics, and BI reporting. The other portfolio projects are intended to demonstrate different engineering concerns rather than duplicate this e-commerce implementation.
+
